@@ -46,10 +46,45 @@ https://docs.polygon.technology/docs/develop/network-details/network
 - what's the difference to .env file?
 - use `fs.readFileSync()` to read the private key defined in .secret file
 
-ERC721URIStorage is inherited from ERC721 itself
+## Start writing Solidity contracts
+### about the libraries imported
+- ERC721URIStorage is inherited from ERC721 itself
+  - gives us extra setTokenURI
+- Counter utils for incrementing numbers
 
+## `Using ... for` in Solidity
+https://docs.soliditylang.org/en/v0.8.11/contracts.html#using-for
+- But still not fully understand how it workds now
 
-`_tokenIds` keep track of unique identifier for each token
+## variables in global scope within NFT contract
+- `_tokenIds` keep track of unique identifier for each token
 contractAddress - address of the marketplace that we want to allow NFT to interact with
+- `contractAddress` is the address of the marketplace, that we want to allow the NFT to be able to interact with or vice versa. 
+  - We want to be able to give the NFT marketplace the ability to transact these tokens or change the ownership of these tokens from a separated contract, the way we do that is to call `setApprovalForAll()`, and we are going to be passing in the value of the contract address which we are going to be setting in our `constructor()`.
 
-Give the marketplace the ability to transact these tokens or change the ownership of these tokens from a seperated contract, the way we do that is to call `setApprovalForAll()`, and we are going to be passing in the value of the contract which we are going to be setting in our constructor
+## Explaining what variables get stored
+- only `tokenURI` gets passed into `createToken()`, because:
+  - `marketplaceAddress` is already stored when `constructor()` fires
+  - `_tokenIds` is in the global scope of the smart contract.
+  - we also know who is the person invoking this `createToken()` because it's a transaction, `msg.sender` provides the address of the person initiating the transaction.
+
+- That means a new token needs these two things too, but since they are stored in the global scope of the smart contract, all the token has access to these too.
+
+## inside `createToken()`
+
+### `_tokenIds`
+- it is of type `Counters.Counter`.
+- `Counters` is the library imported from openzeppelin
+  - which has several methods, including `increment()`, `current()`
+
+### `_mint()` is an internal function from ERC721
+
+### `_setTokenURI()` also from ERC721
+- in principle I understand when minting a token, it's necessary to link up the tokenId with the metadata (tokenURI), but where does the mapping get stored?
+
+### `setApprovalForAll()`
+- to give the marketplace an approval to transact this token between the users, from within another contract.  
+
+### why returning `newItemId`?
+- To interact with the smart contract from a client application, we are typically mint a token and set it for sell in a subsequent transaction, and to put it for sell we need to know the ID of the token. That's why we need to return the ID here to get ahold of it on the client. 
+
