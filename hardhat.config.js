@@ -10,11 +10,11 @@ module.exports = {
     },
     mumbai: {
       url: 'https://speedy-nodes-nyc.moralis.io/f4facbb3ad92bd0d51f79c62/polygon/mumbai', // not sure if this is the correct end point
-      account: [privateKey],
+      accounts: [privateKey],
     },
     mainnet: {
       url: 'https://speedy-nodes-nyc.moralis.io/f4facbb3ad92bd0d51f79c62/polygon/mainnet', // not sure if this is the correct end point
-      account: [privateKey],
+      accounts: [privateKey],
     },
   },
   solidity: '0.8.4',
