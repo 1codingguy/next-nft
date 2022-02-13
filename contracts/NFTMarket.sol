@@ -114,14 +114,14 @@ contract NFTMarket is ReentrancyGuard {
 
   // return the unsoldItem, better name would be `fetchUnsoldItems`
   function fetchMarketItems() public view returns (MarketItem[] memory) {
-    uint256 itemCount = _itemIds.current();
+    uint256 totalItemCount = _itemIds.current();
     uint256 unsoldItemCount = _itemIds.current() - _itemsSold.current();
     uint256 currentIndex = 0; // index of the unsoldItems array
 
     // init an array with the lenght matching the number of unsold items
     MarketItem[] memory unsoldItems = new MarketItem[](unsoldItemCount);
 
-    for (uint256 i = 0; i <= itemCount; i++) {
+    for (uint256 i = 0; i <= totalItemCount; i++) {
       // unsold items have a zero address in owner attribute
       // if init i=1, then no need to +1 here
       if (idToMarketItem[i + 1].owner == address(0)) {
@@ -135,5 +135,29 @@ contract NFTMarket is ReentrancyGuard {
     }
 
     return unsoldItems;
+  }
+
+  // return the NFTs created by me
+  function fetchMyNFTs() public view returns (MarketItem[] memory) {
+    uint256 totalItemCount = _itemIds.current();
+    uint256 myTokensCount = 0;
+    uint256 currentIndex = 0;
+
+    // init i=1 instead of i=0 like in tutorial
+    for (uint256 i = 1; i <= totalItemCount; i++) {
+      if (idToMarketItem[i].owner == msg.sender) {
+        myTokensCount++;
+      }
+    }
+
+    MarketItem[] memory myNFTs = new MarketItem[](myTokensCount);
+
+    for (uint256 i = 1; i <= totalItemCount; i++) {
+      if (idToMarketItem[i].owner == msg.sender) {
+        myNFTs[currentIndex] = idToMarketItem[i];
+        currentIndex++;
+      }
+    }
+    return myNFTs;
   }
 }

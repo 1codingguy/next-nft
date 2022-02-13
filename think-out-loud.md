@@ -204,3 +204,9 @@ to create an array of specific length:
 LHS: type location varName
 RHA: newKeyword type lengthOfArray
 
+### fetchMyNFTs()
+how to create a dynamic array?
+- I thought I need to create a dynamic array because the total number of NFTs created is unknown at this point.
+- But what the author does is to
+  1. loop over the entire collection, get the total number of array owned by `msg.sender`
+  2. then init a fixed length array with that number and populate that new array
