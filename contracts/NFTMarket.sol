@@ -93,7 +93,10 @@ contract NFTMarket is ReentrancyGuard {
     uint256 price = idToMarketItem[itemId].price;
     uint256 tokenId = idToMarketItem[itemId].tokenId;
 
-    require(msg.value == price, "Please submit the asking price to complete the transaction");
+    require(
+      msg.value == price,
+      'Please submit the asking price to complete the transaction'
+    );
 
     // transfer the amount to seller
     idToMarketItem[itemId].seller.transfer(msg.value);
@@ -109,24 +112,28 @@ contract NFTMarket is ReentrancyGuard {
     payable(owner).transfer(listingPrice);
   }
 
-  // // return the unsoldItem
-  // function fetchMarketItems() public view returns(MarketItem[] memory) {
-  //   uint256 itemCount = _itemIds.current();
-  //   uint256 unsoldItemCount = _itemIds.current() - _itemsSold.current();
-  //   uint256 currentIndex = 0;
+  // return the unsoldItem, better name would be `fetchUnsoldItems`
+  function fetchMarketItems() public view returns (MarketItem[] memory) {
+    uint256 itemCount = _itemIds.current();
+    uint256 unsoldItemCount = _itemIds.current() - _itemsSold.current();
+    uint256 currentIndex = 0; // index of the unsoldItems array
 
-  //   // init an array with the lenght matching the number of unsold items
-  //   MarketItem[] memory items = new MarketItem[](unsoldItemCount);
+    // init an array with the lenght matching the number of unsold items
+    MarketItem[] memory unsoldItems = new MarketItem[](unsoldItemCount);
 
-  //   for(uint256 i=0; i<= itemCount ; i++) {
-  //     // unsold items have a zero address in owner attribute
-  //     if (idToMarketItem[i].owner == address(0)){
-  //       uint256 currentId = i+1;
-        
-  //     }
-  //   }
+    for (uint256 i = 0; i <= itemCount; i++) {
+      // unsold items have a zero address in owner attribute
+      // if init i=1, then no need to +1 here
+      if (idToMarketItem[i + 1].owner == address(0)) {
+        uint256 currentId = i + 1;
+        // insert the unsold item into unsoldItems array
+        // didn't follow tutorial to create an intermediate variable
+        unsoldItems[currentIndex] = idToMarketItem[currentId];
+        // increment the index, current index already populated
+        currentIndex++;
+      }
+    }
 
-  // }
-
-
+    return unsoldItems;
+  }
 }
