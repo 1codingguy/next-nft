@@ -88,3 +88,119 @@ contractAddress - address of the marketplace that we want to allow NFT to intera
 ### why returning `newItemId`?
 - To interact with the smart contract from a client application, we are typically mint a token and set it for sell in a subsequent transaction, and to put it for sell we need to know the ID of the token. That's why we need to return the ID here to get ahold of it on the client. 
 
+## work on `NFTMarket.sol`
+- importing `ReentrancyGuard`, security control
+- need this for any functions that talk to another contract
+- NFTMarket inherits from `ReentrancyGuard`
+
+## global variables in NFTMarket
+
+Why need to keep up with the number of items sold?
+- when working with arrays in Solidity, cannot have dynamic linked array, so you need to know the link of the array.
+- few of the arrays we are going to work with:
+  - the number of items I've bought myself
+  - the number of items I've created myself
+  - the number of items that are currently not sold
+- we need the numbers because we are going to return those values
+
+### Reason to determine who's the owner of the contract
+- the owner makes a commission on the item sold
+
+# Before continuing, read the related blog post to get an OVERVIEW of the project
+- I had the feeling that I was coding something without understanding why when I was simply coding along without understanding the forest
+
+### listingPrice in `ether` even deploying to Polygon
+- Matic and Ether both have 18 decimal point
+
+### owner of NFTMarketplace = msg.sender
+- it means owner of this contract is the person deploying it, which will be the contract address that we deploy this with 
+
+- What's the difference between itemId and tokenId? I guess: 
+  - `itemId` is the ID for each item in the marketplace
+  - `tokenId` refers to the minted token?
+
+`idToMarketItem` mapping, why id is in `uint256`? `_itemIds` is of type `Counters.Counter`
+
+### event
+- event is a function call because it's defined with `()`? And separating the arguments inside the call uses `,`.
+- defining a `struct` uses `{}`, like object, separating each item inside the struct definition uses `;`, just like JS object.
+- emit an event when a market item is created. A way to listen to this event from a front end application. 
+- what's the `indexed` keyword for when defining event?
+  - The indexed parameters for logged events will allow you to search for these events using the indexed parameters as filters.
+  - The indexed keyword is only relevant to logged events.
+  - Up to three parameters can receive the attribute indexed which will cause the respective arguments to be searched for: It is possible to filter for specific values of indexed arguments in the user interface.
+  - https://ethereum.stackexchange.com/questions/8658/what-does-the-indexed-keyword-do
+
+
+## Examining what's actually done in createToken()
+
+### Explanation on `using Counters for Counters.Counter`
+- `Counters` is a library, `Counter` is a struct data type inside `Counters` library.
+- when we say using A for B. it means that attach every function from library A to type B.
+- so when you say using `Counters for Counters.Counter` it means that assign all the functions inside `Counters` library like `current()` or `increment()` to the `Counter` struct.
+- libraries are an efficient way to reduce gas fees. because they are deployed only once at a specific address with its code being reused by various contracts.
+- https://ethereum.stackexchange.com/questions/97186/what-is-the-reason-behind-writing-using-counters-for-counters-counters-when-us/116726#116726?newreg=bff2a399d1a14d9eb2371a3f3aa5670a
+
+### what does _mint() in ERC721 actually do?
+- check the target address is not a zero address
+- check if the token to mint doesn't exist yet by checking `tokenID`
+- call `_beforeTokenTransfer()` hook (which can be not doing anything)
+  - "in the case of the _beforeTokenTransfer hook, you can execute functionality before the token is transferred."
+  - https://forum.openzeppelin.com/t/how-to-use-beforetokentransfer-when-extending-erc721presetminterpauserautoid-contract/3505/2
+  - in the source code `_beforeTokenTransfer()` is marked as a virtual function.
+    - "Base functions can be overridden by inheriting contracts to change their behavior if they are marked as virtual."
+    - https://ethereum.stackexchange.com/questions/78572/what-are-the-virtual-and-override-keywords-in-solidity
+    - "You could restrict transfer (other than minting) to only registered candidates, you could mint another token to signify that the original holder has voted, you could prevent transfer outside of specific voting times, you could emit a vote event."
+    - "if you don’t need to use hooks, then you don’t need to include the function in your child contract."
+  - register one more token under the new owner's address by increment the target address total token count by 1: `_balances[to] += 1;`
+    -  `_balances` is a mapping of "address" to "token count", which means it tracks what address (who) owns how many tokens in total
+  - To register the minted token under new owner's address: `_owners[tokenId] = to;`
+    - `_owners` is a mapping from token ID to owner address
+  - both `_balances` and `_owners` mappings are defined inside ERC721 contract.
+
+### what does _setTokenURI() in ERC721URIStorage do?
+- check if the token we are going to mint actually exist
+  - by calling `_exists()` from `ERC721.sol`
+  - recall `ERC721URIStorage` inherits from `ERC721`
+- registering the newly minted token should point to which URI.
+  - `_tokenURIs` is a mapping inside ERC721URIStorage``, registering which token (tokenID) has what URI info/ address
+
+
+### what does `setApprovalForAll()` do?
+- `setApprovalForAll()` is from ERC721
+- calls `_setApprovalForAll()` internal function.
+- allows the marketplace (the operator) to operate on all of owner's token
+
+---
+
+# Continue NFTMarket.sol
+
+2 functions to interact with contract
+1. createMarketItem
+2. createMarketSale
+
+### Transfer NFT (token) from the person who minted the NFT (token) to the marketplace
+- transfer the ownership of the NFT to the contract itself (marketplace)
+- right now the person that is writing the transaction owns this, we want to transfer ownership to this contract (marketplace), then transfer the owneship to the new buyer
+- But why need to call IERC721, passing `nftContract` as an argument?
+
+
+### Point of confusion for me right now:
+`_itemIds` in `NFTMarket.sol`
+`_tokenIds` in `NFT.sol`
+a market item is an NFT, which is a token, then why need to keep two IDs?
+
+NFT is a contract that creates new NFT token, NFTMarketplace is the marketplace to mint/ transact token?
+
+Different functions to view our NFTs, functions that:
+- return all the unsold items
+- only the items I've purchased
+- return all the items I've created
+
+
+to create an array of specific length:
+`MarketItem[] memory items = new MarketItem[](unsoldItemCount);`
+
+LHS: type location varName
+RHA: newKeyword type lengthOfArray
+
