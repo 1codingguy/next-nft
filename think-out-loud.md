@@ -220,3 +220,29 @@ Is it possible to refactor these three functions:
 
 All these functions are so similar to each other, the only difference is what variable to look for in each `MarketItem`.
 - is it because it's Solidity so things are done differently again?
+
+## Writing test with hardhat
+- In the constructor of the actual NFT market, we need to pass in the market address (of where it is deployed)
+
+`ethers.utils.parseUnits()`
+- allows us to work with this whole unit as supposed to work with wei which is 18 decimals
+
+
+So creating:
+- a new NFT token 
+- a new market item in the marketplace
+is a totally separated process?
+
+In writing test, first need to create a token by passing the tokenURI.
+Then in a separated function call, calling createMarketItem(), and manually assigning a tokenId to each item? I thought it was supposed to be incrementing by itself
+
+note that in the call of createMarketItem:
+`await market.createMarketItem(deployedNFTContractAddress, 1, auctionPrice, {value: listingPrice})`
+- the last argument `{value: listingPrice}` is not found in the definition
+- but I guess it's referring to `msg.value`, that is the amount sent with the transaction. So that means this argument is passed in an object at the last place of function call in solidity?
+
+
+Up until this point, we have created different transactions. How to get different address form different users theoretically:
+- In real use case, users will be using MetaMask or some wallet to interact with the contract from some address
+- But in a test env, we can get reference to a bunch of test accounts - when running a hardhat node, 20 local accounts are given to work with 
+
