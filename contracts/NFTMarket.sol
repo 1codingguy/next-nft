@@ -26,7 +26,7 @@ contract NFTMarket is ReentrancyGuard {
     uint256 itemId;
     address nftContract; // the contract address
     uint256 tokenId;
-    address payable seller;
+    address payable seller; // seller here means original creator and the value will never change?
     address payable owner;
     uint256 price;
     bool sold; // if an item is sold
@@ -108,7 +108,7 @@ contract NFTMarket is ReentrancyGuard {
     idToMarketItem[itemId].sold = true;
     // increse the number of total item sold by 1
     _itemsSold.increment();
-    // pay the owner of the contract
+    // pay the owner of the contract, where does this `owner` come from tho?
     payable(owner).transfer(listingPrice);
   }
 
@@ -143,7 +143,7 @@ contract NFTMarket is ReentrancyGuard {
     uint256 myTokensCount = 0;
     uint256 currentIndex = 0;
 
-    // init i=1 instead of i=0 like in tutorial
+    // init i=1 instead of i=0 like in tutorial, so no `currentId` is needed
     for (uint256 i = 1; i <= totalItemCount; i++) {
       if (idToMarketItem[i].owner == msg.sender) {
         myTokensCount++;
@@ -159,5 +159,29 @@ contract NFTMarket is ReentrancyGuard {
       }
     }
     return myNFTs;
+  }
+
+  // returns an array of NFTs created by me (msg.sender)
+  function fetchItemsCreated() public view returns (MarketItem[] memory) {
+    uint256 totalItemCount = _itemIds.current();
+    uint256 myItemsCount = 0;
+    uint256 currentIndex = 0;
+
+    for (uint256 i = 1; i <= totalItemCount; i++) {
+      if (idToMarketItem[i].seller == msg.sender) {
+        myItemsCount++;
+      }
+    }
+
+    MarketItem[] memory myCreation = new MarketItem[](myItemsCount);
+
+    for (uint256 i = 1; i <= totalItemCount; i++) {
+      if (idToMarketItem[i].seller == msg.sender) {
+        myCreation[currentIndex] = idToMarketItem[i];
+        currentIndex++;
+      }
+    }
+
+    return myCreation;
   }
 }

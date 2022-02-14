@@ -210,3 +210,13 @@ how to create a dynamic array?
 - But what the author does is to
   1. loop over the entire collection, get the total number of array owned by `msg.sender`
   2. then init a fixed length array with that number and populate that new array
+
+- there should be a way to stop the for loop going on if the last position at myNFTS[] is already filled - i.e. means the last NFT minted by me was found, so no further looping is required
+
+Is it possible to refactor these three functions:
+- `fetchMarketItems()`
+- `fetchMyNfts()`
+- `fetchItemsCreated()`
+
+All these functions are so similar to each other, the only difference is what variable to look for in each `MarketItem`.
+- is it because it's Solidity so things are done differently again?
