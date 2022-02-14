@@ -1,32 +1,52 @@
 const { expect } = require('chai')
 
 describe('NFTMarket', function () {
-  it('should create and execute market sales', async () => {
+  let market // an instance of the market contract
+  let NFT // an instance of the NFT contract
+  let deployedMarketAddress
+  let deployedNFTContractAddress
+  let listingPrice
+  let auctionPrice
+
+  it('should create and deploy the marketplace', async () => {
     // deploy the marketplace
     // get a reference to the market contract
     const MarketContract = await ethers.getContractFactory('NFTMarket')
-    const market = await MarketContract.deploy()
+    market = await MarketContract.deploy()
     // wait until the contract finished being deployed
     await market.deployed()
     // get a reference to the address of where it is deployed
-    const deployedMarketAddress = market.address
+    deployedMarketAddress = market.address
 
+    console.log(`deployedMarketAddress is ${deployedMarketAddress}`)
+  })
+
+  it('should deploy the NFT contract', async () => {
     // deploy the NFT contract
     const NFTContract = await ethers.getContractFactory('NFT')
-    const NFT = await NFTContract.deploy(deployedMarketAddress)
+    NFT = await NFTContract.deploy(deployedMarketAddress)
     await NFT.deployed()
-    const deployedNFTContractAddress = NFT.address
+    deployedNFTContractAddress = NFT.address
 
-    let listingPrice = await market.getListingPrice()
+    console.log(`deployedNFTContractAddress is ${deployedNFTContractAddress}`)
+  })
+
+  it('should retrieve the marketplace listing price', async () => {
+    listingPrice = await market.getListingPrice()
     // why is it necessary to convert the listingPrice to a string?
     listingPrice = listingPrice.toString()
 
-    const auctionPrice = ethers.utils.parseUnits('100', 'ether')
+    console.log(`listingPrice is ${listingPrice}`)
+  })
 
+  it('should parse the autionPrice and create two tokens', async () => {
+    auctionPrice = ethers.utils.parseUnits('100', 'ether')
     // create token, interact with NFT contract
     await NFT.createToken('https://www.mytokenlocation.com')
     await NFT.createToken('https://www.mytokenlocation2.com')
+  })
 
+  it('should create 2 items in the marketplace', async () => {
     // create items in the marketplace
     await market.createMarketItem(deployedNFTContractAddress, 1, auctionPrice, {
       value: listingPrice,
@@ -34,16 +54,18 @@ describe('NFTMarket', function () {
     await market.createMarketItem(deployedNFTContractAddress, 2, auctionPrice, {
       value: listingPrice,
     })
+  })
 
-    // generate test accounts for local testing env
+  it('should generate test accounts for local testing env', async () => {
     const [_, buyerAddress] = await ethers.getSigners()
     // use the buyer's address to connect to the market
     await market
       .connect(buyerAddress)
       .createMarketSale(deployedNFTContractAddress, 1, { value: auctionPrice })
+  })
 
-    // querying the marketItems
+  it('should querying the marketItems ', async () => {
     const unsoldItems = await market.fetchMarketItems()
-    console.log('unsold items:', items)
+    console.log('unsold items:', unsoldItems)
   })
 })
