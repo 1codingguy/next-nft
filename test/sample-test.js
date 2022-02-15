@@ -39,7 +39,7 @@ describe('NFTMarket', function () {
     console.log(`listingPrice is ${listingPrice}`)
   })
 
-  it('should parse the autionPrice and create two tokens', async () => {
+  it('should parse the auctionPrice and create two tokens', async () => {
     auctionPrice = ethers.utils.parseUnits('100', 'ether')
     // create token, interact with NFT contract
     await NFT.createToken('https://www.mytokenlocation.com')
@@ -57,15 +57,34 @@ describe('NFTMarket', function () {
   })
 
   it('should generate test accounts for local testing env', async () => {
-    const [_, buyerAddress] = await ethers.getSigners()
     // use the buyer's address to connect to the market
+    const [_, buyerAddress] = await ethers.getSigners()
+    // execute sale of token to another user (tokenId == 1)
     await market
       .connect(buyerAddress)
       .createMarketSale(deployedNFTContractAddress, 1, { value: auctionPrice })
   })
 
-  it('should querying the marketItems ', async () => {
-    const unsoldItems = await market.fetchMarketItems()
+  it('should query and return the unsold items', async () => {
+    // there should be only one unsold item with tokenId == 2
+    let unsoldItems = await market.fetchMarketItems()
+
+    unsoldItems = await Promise.all(
+      unsoldItems.map(async i => {
+        // tokenURI() method from IERC721 interface
+        // calling the NFT contract
+        const tokenURI = await NFT.tokenURI(i.tokenId)
+        let item = {
+          price: i.price.toString(), // turning Big number into string
+          tokenId: i.tokenId.toString(), // turning Big number into string
+          seller: i.seller,
+          owner: i.owner,
+          tokenURI,
+        }
+        return item
+      })
+    )
+
     console.log('unsold items:', unsoldItems)
   })
 })

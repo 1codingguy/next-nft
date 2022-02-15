@@ -246,3 +246,10 @@ Up until this point, we have created different transactions. How to get differen
 - In real use case, users will be using MetaMask or some wallet to interact with the contract from some address
 - But in a test env, we can get reference to a bunch of test accounts - when running a hardhat node, 20 local accounts are given to work with 
 
+`await Promise.all()`
+- allows us to do an async mapping
+
+- repurpose the value of these items
+- set these items to be the result of this map, map over all of them.
+
+
