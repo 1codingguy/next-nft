@@ -251,7 +251,9 @@ Up until this point, we have created different transactions. How to get differen
   - repurpose the value of these items
   - set these items to be the result of this map, map over all of them.
 
-## work on front end
+## work on front end, _app.js
+
+- As per official Next.js doc, _app.js is "To override the default App, create the file ./pages/_app.js "
 
 tailwind class meaning
 `border-b` - border-bottom-width: 1px;
@@ -259,3 +261,47 @@ tailwind class meaning
 Instead of checking each class and its meaning one by one, input those classes in the html file, then go to the browser dev too to see what each class does.
 - That saves a lot of time looking up on the documentation
 - The goal now is not to master Tailwind, just to experience how it is with the tutorial. NO NEED to remember everything.
+
+## work on index.js
+- Web3Modal is a way for us to connect to someone's Ethereum wallet.
+
+When we deploy our project, need to have a reference to address of our marketplace and nft
+- init variables in config.js
+- once we deployed, have these values in the variables -> import those vars in index.js
+
+- what we are doing in index.js now:
+1. get the address of the contract
+2. get the abi
+recall that in order to interact with deployed contracts on chain, we need both address and abi.
+
+### `artifacts` folder in root
+- those compiled contracts are saved under this folder
+- `npx hardhat compile` will compile and save the compiled json files in this folder.
+- `npx hardhat test` will do the same, compile first then run the tests in the `test` folder
+
+`nft` state variable
+- when the app loads, `nft` is empty, then we are going to call the smart contract, update the local state.
+
+`loadNFTs()`
+- in a read operation we don't need to know anything about the user, so we can use a very generic provider `JsonRpcProvider()`
+  - "The JSON-RPC API is a popular method for interacting with Ethereum"
+  - "https://docs.ethers.io/v5/api/providers/jsonrpc-provider/"
+- What is a provider:
+  - "A Provider in ethers is a read-only abstraction to access the blockchain data."
+  - https://docs.ethers.io/v5/api/providers/provider/#:~:text=A%20Provider%20in%20ethers%20is,Coming%20from%20Web3.&text=The%20ethers%20library%20creates%20a,of%20a%20Signer%2C%20which%20Web3.
+
+
+Form my understanding now:
+- provider is the means to access data on blockchain
+- address to point to where in blockchain
+- what about abi? provide a compiled json file of what the contract looks like?
+
+
+- look for the instance of the Ethereum that is being injected into the web browser.
+- if the user is connected, then we will have a connection to work with
+- create a provider with that user's address (from the connection)
+  - use `web3Provider` instead of `JsonRpcProvider` as in `loadNFTs()`
+  - what's the difference between these providers?
+- since we are writing an actual transaction, we need user's address and we need them to sign and execute an actual transaction
+- to do that we have to create a signer
+- after that, when we get a reference to the contract, instead of passing the basic provider as the 3rd argument, we are passing in the signer instead.

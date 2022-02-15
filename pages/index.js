@@ -2,12 +2,116 @@ import styles from '../styles/Home.module.css'
 import { ethers } from 'ethers'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import Web3Modal from "web3modal"
+import Web3Modal from 'web3modal'
+// reference to the deployed address
+import { nftaddress, nftmarketaddress } from '../config'
+// reference to the compiled artifacts
+import NFT from '../artifacts/contracts/NFT.sol/NFT.json'
+import Market from '../artifacts/contracts/NFTMarket.sol/NFTMarket.json'
 
 export default function Home() {
+  const [nfts, setNfts] = useState([])
+  const [loadingState, setLoadingState] = useState('not-loaded')
+
+  useEffect(() => {
+    loadNFTs()
+  }, [])
+
+  const loadNFTs = async () => {
+    const provider = new ethers.providers.JsonRpcProvider()
+    const tokenContract = new ethers.Contract(nftaddress, NFT.abi, provider)
+    const marketContract = new ethers.Contract(
+      nftmarketaddress,
+      Market.abi,
+      provider
+    )
+    const data = await marketContract.fetchMarketItems()
+
+    const unsoldItems = await Promise.all(
+      data.map(async i => {
+        const tokenURI = tokenContract.tokenURI(i.tokenId)
+        const metaData = await axios.get(tokenURI)
+        let price = ethers.utils.formatUnits(i.price.toString(), 'ether')
+        let item = {
+          price,
+          tokenId: i.tokenId.toNumber(),
+          seller: i.seller,
+          owner: i.owner,
+          image: metaData.data.image,
+          name: metaData.data.name,
+          description: metaData.data.description,
+        }
+        return item
+      })
+    )
+
+    setNfts(unsoldItems)
+    setLoadingState('loaded')
+  }
+
+  const buyNFT = async nft => {
+    // allow user to connect to their wallet
+    const web3Modal = new Web3Modal()
+    const connection = await web3Modal.connect()
+    const provider = new ethers.providers.Web3Provider(connection)
+
+    const signer = provider.getSigner()
+    // this is a reference to the marketplace?
+    const contract = new ethers.Contract(nftmarketaddress, market.abi, signer)
+    // get a reference to the price from the input argument
+    const price = ethers.utils.parseUnits(nft.price.toString(), 'ether')
+    // 2nd argument: getting the tokenId from the nft token itself?
+    const transaction = await contract.createMarketSale(
+      nftaddress,
+      nft.tokenId,
+      { value: price }
+    )
+    // wait until the transaction to actually executed
+    // then re-render because it's necessary to remove the sold NFT from the screen
+    await transaction.wait()
+    // call loadNFTs again to load the updated data from chain, yes I am right.
+    loadNFTs()
+  }
+
+  if (loadingState === 'loaded' && nfts.length === 0) {
+    return <h1 className='px-20 py-10 text-3xl'>No items in marketplace</h1>
+  }
+
   return (
-    <div className={styles.container}>
-      <h1>home</h1>
+    <div className='flex justify-center'>
+      <div className='px-4' style={{ maxWidth: '1600px' }}>
+        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4'>
+          {nfts.map((nft, i) => {
+            return (
+              <div key={i} className='border shadow rounded-xl overflow-hidden'>
+                <img src={nft.image} />
+                <div className='pt-4'>
+                  <p
+                    className='text-2xl font-semibold'
+                    style={{ height: '64px' }}
+                  >
+                    {nft.name}
+                  </p>
+                  <div style={{ height: '70px', overflow: 'hidden' }}>
+                    <p className='text-gray-400'>{nft.description}</p>
+                  </div>
+                </div>
+                <div className='p-4 bg-black'>
+                  <p className='text-2xl mb-4 font-bold text-white'>
+                    {nft.price} Matic
+                  </p>
+                  <button
+                    className='w-full bg-pink-500 text-white font-bold py-2 px-12 rounded'
+                    onClick={() => buyNft(nft)}
+                  >
+                    Buy
+                  </button>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
     </div>
   )
 }
