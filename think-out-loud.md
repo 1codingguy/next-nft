@@ -305,3 +305,8 @@ Form my understanding now:
 - since we are writing an actual transaction, we need user's address and we need them to sign and execute an actual transaction
 - to do that we have to create a signer
 - after that, when we get a reference to the contract, instead of passing the basic provider as the 3rd argument, we are passing in the signer instead.
+
+## running a local node and deploy locally
+- `npx hardhat node` gives a list of accounts to test scripts locally
+- `npx hardhat run scripts/deploy.js --network localhost` runs the deploy script with the local generated node
+- then copy the address of both NFTMarket and NFT, paste them into config.js
