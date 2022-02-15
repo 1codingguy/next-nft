@@ -248,8 +248,14 @@ Up until this point, we have created different transactions. How to get differen
 
 `await Promise.all()`
 - allows us to do an async mapping
+  - repurpose the value of these items
+  - set these items to be the result of this map, map over all of them.
 
-- repurpose the value of these items
-- set these items to be the result of this map, map over all of them.
+## work on front end
 
+tailwind class meaning
+`border-b` - border-bottom-width: 1px;
 
+Instead of checking each class and its meaning one by one, input those classes in the html file, then go to the browser dev too to see what each class does.
+- That saves a lot of time looking up on the documentation
+- The goal now is not to master Tailwind, just to experience how it is with the tutorial. NO NEED to remember everything.
