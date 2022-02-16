@@ -310,3 +310,44 @@ Form my understanding now:
 - `npx hardhat node` gives a list of accounts to test scripts locally
 - `npx hardhat run scripts/deploy.js --network localhost` runs the deploy script with the local generated node
 - then copy the address of both NFTMarket and NFT, paste them into config.js
+
+### re-run deploy.js next day, error:
+- came from copying nft deployed address as `nftmarketaddress`
+
+
+### detour for IPFS server related setting with Moralis
+- tutorial works with Infura, but I work with Moralis, needs to figure out how to upload to IPFS using Moralis
+- replacing this with something from Moralis
+`const client = ipfsHttpClient('https://ipfs.infura.io:5001/api/v0')`
+- an url we can use to set and pin items to ipfs
+
+the `try...catch` block, understand what it does first
+`client.add` 
+- add a file or directory to IPFS
+- the progress bit is optional 
+
+so the purpose of all these is that to upload a file onto IPFS via Infura/ Moralis, then get the url that was loaded to and set to the state variable. Let's see how to do it with Moralis
+
+On top of the example video from Moralis:
+Moralis.initialize() - arg: application id from moralis.io
+Moralis.serverURL() - arg: server url from moralis.io
+
+in the `upload()`
+```
+const file = new Moralis.File("fileName", "actualFileData")
+await file.saveIPFS()
+console.log(file.hash())
+console.log(file.ipfs())
+```
+
+it seems `file.ipfs()` returns the url that was uploaded to?
+
+Tutorial from Moralis to refer to:
+https://moralis.io/full-guide-how-to-upload-to-ipfs/
+- is it a must to login and logout?
+- it seems the login function from Moralis is to connect the user to MetaMask wallet? Then in this sense it's the same as using web3modal in the tutorial?
+
+So now, Infura or Moralis are doing these things:
+- deploy to a Mumbai test net
+- upload to ipfs client
+- 
