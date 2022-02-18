@@ -351,3 +351,18 @@ So now, Infura or Moralis are doing these things:
 - deploy to a Mumbai test net
 - upload to ipfs client
 - 
+### my guess of what's going on with this block of code:
+```
+    1. const web3modal = new Web3Modal()
+    2. const connection = await web3modal.connect()
+    3. const provider = new ethers.providers.Web3Provider(connection)
+    4. const signer = provider.getSigner()
+```
+
+- web3modal is to connect to Ethereum wallet, line 1 create an instance of the web3modal object
+- line 2 is to wait for the user to connect to web3modal object?
+- line 3 is to confirm which one is the wallet provider - MataMask or something else?
+- line 4 is to get the address of the person who signs in with the wallet - hence `signer`
+
+### Connecting accounts with MetaMask, still don't know exactly how to do 
+
