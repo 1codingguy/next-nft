@@ -9,6 +9,7 @@ import { nftaddress, nftmarketaddress } from '../config'
 import NFT from '../artifacts/contracts/NFT.sol/NFT.json'
 import Market from '../artifacts/contracts/NFTMarket.sol/NFTMarket.json'
 
+
 export default function CreateItem() {
   const [fileUrl, setFileUrl] = useState(null) // ipfs file allow user to upload
   const [formInput, updateFormInput] = useState({
@@ -23,10 +24,14 @@ export default function CreateItem() {
     // get the user input file from the form, it's not a url I reckon?
     const file = e.target.files[0]
     try {
-      // upload the file to ipfs via Moralis
+      // upload the file to ipfs
+      const added = await client.add(file, {
+        progress: prog => console.log(`received: ${prog}`),
+      })
       // get the url that was uploaded to, assign to `fileUrl` state variable
+      const url = `https://ipfs.infura.io/ipfs/${added.path}`
     } catch (error) {
-      console.log(error)
+      console.log('Error uploading file: ', error)
     }
   }
 
@@ -42,12 +47,12 @@ export default function CreateItem() {
       image: fileUrl,
     })
     try {
-      // save `data` to ipfs
-      // see how to do it on moralis
-      // then call createSale()
-      // createSale(url)
+      const added = await client.add(data)
+      const url = `https://ipfs.infura.io/ipfs/${added.path}`
+      /* after file is uploaded to IPFS, pass the URL to save it on chain */
+      createSale(url)
     } catch (error) {
-      console.log(error)
+      console.log('Error uploading file: ', error)
     }
   }
 
@@ -80,7 +85,6 @@ export default function CreateItem() {
     contract = new ethers.Contract(nftmarketaddress, Market.abi, signer)
     let listingPrice = await contract.getListingPrice()
     // turn the listing price into string
-    listingPrice = listingPrice.toString()
     transaction = await contract.createMarketItem(nftaddress, tokenId, price, {
       value: listingPrice,
     })

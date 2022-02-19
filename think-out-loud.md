@@ -366,3 +366,5 @@ So now, Infura or Moralis are doing these things:
 
 ### Connecting accounts with MetaMask, still don't know exactly how to do 
 
+## Instead of trying to use endpoint from Moralis, try to use Mainnet or Ropsten instead
+- since there's more Eth in Ropsten, try using Ropsten first to test
