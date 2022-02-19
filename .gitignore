@@ -47,6 +47,3 @@ artifacts
 
 # to store private key, same as .env function-wise
 .secret
-
-#
-org-README.md
