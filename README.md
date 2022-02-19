@@ -1,7 +1,7 @@
 # NFT marketplace code along
 
-[Video tutorial link](https://www.youtube.com/watch?v=GKJBEEXUha0)
-[Blog post link](https://dev.to/dabit3/building-scalable-full-stack-apps-on-ethereum-with-polygon-2cfb)
+- [Video tutorial link](https://www.youtube.com/watch?v=GKJBEEXUha0)
+- [Blog post link](https://dev.to/dabit3/building-scalable-full-stack-apps-on-ethereum-with-polygon-2cfb)
 
 
 ## Main takeaway:
